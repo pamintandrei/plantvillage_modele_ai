@@ -9,9 +9,9 @@ from typing import Dict, Tuple, List
 def load_dataset(img_size, folder, batch_size):
     transforms = get_preprocessing_transforms(img_size)
     dataset = ImageFolder(folder,transform=transforms)
-    ImageFolder.find_classes=overwrite_find_classes_attack
     data_loader = utils.data.DataLoader(
         dataset,
+        sampler = utils.data.WeightedRandomSampler([1./15]*15, batch_size),
         batch_size=int(batch_size),
         num_workers=0,
         pin_memory=False,
@@ -31,15 +31,6 @@ def get_preprocessing_transforms(size):
     t=transforms.Compose(t)
     return t
 
-def overwrite_find_classes_attack(self, directory: str) -> Tuple[List[str], Dict[str, int]]:
-    classes = sorted(entry.name for entry in os.scandir(directory) if entry.is_dir())
-    if not classes:
-        raise FileNotFoundError(f"Couldn't find any class folder in {directory}.")
-
-    class_to_idx = {cls_name: i for i, cls_name in enumerate(classes)}
-    print(class_to_idx)
-    return classes, class_to_idx
-
-load_dataset(224, "D:/plantvillage_modele_ai/PlantVillage/", 32)
+#load_dataset(224, "D:/plantvillage_modele_ai/PlantVillage/", 32)
 
     
