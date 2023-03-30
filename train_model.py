@@ -5,53 +5,60 @@ from utils import write_results
 import torch
 
 
-model = load_model() # load_model
-
-train_loader = load_dataset(224, "D:\plantvillage_modele_ai\PlantVillageSplit\train", 64)
-test_loader = load_dataset(224, "D:\plantvillage_modele_ai\PlantVillageSplit\train", 64)
-
-optimizer, criterion, epochs = load_training() # put params here
-
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+model = load_model() # load_model
+model.to(device)
+
+train_loader = load_dataset(224, "E:/modele_plantvilige/PlantVillageSplit/train", 64, 50)
+test_loader = load_dataset(224, "E:/modele_plantvilige/PlantVillageSplit/val", 64, 10)
+
+optimizer, criterion, epochs = load_training(model.parameters()) # put params here
+
 
 for i in range(epochs):
     loss_avg = 0
-    for images,labels in train_loader:
-        images.to(device)
-        labels.to(device)
+    for idx, (images, labels) in enumerate(train_loader):
+        images = images.to(device)
+        labels = labels.to(device)
         
         # Forward pass
         outputs = model(images)
-        loss = criterion(outputs, labels)
+        loss = criterion(outputs.to(device), labels)
         
         # Backward pass
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        loss_avg+= loss.cpu()    
-    write_results("train.csv",0,0, epoch=i+1, loss=loss_avg/len(train_loader))
+        loss_avg+= loss.cpu()
+        print(f"done:{(idx+1)/len(train_loader)*100} loss:{loss_avg/(idx+1)}")
+    write_results("train.csv", i+1, loss_avg/len(train_loader), 0, 0)
     
     
-    loss_avg, accuracy, top5 = 0
+    loss_avg, accuracy, top5 = 0, 0, 0
     for images, labels in test_loader:
-        images.to(device)
-        labels.to(device)
+        images = images.to(device)
+        labels = labels.to(device)
         
         # Forward pass
-        outputs = model(images).cpu()
+        outputs = model(images)
         loss = criterion(outputs, labels)
+        
+        outputs = outputs.cpu()
+        labels = labels.cpu()
         loss_avg += loss.cpu()
+        
         top1_list = torch.topk(outputs,1)
         top5_list = torch.topk(outputs, 5)
-        
-        accuracy += sum([int(labels[idx] in top1_list[idx]) for idx in len(images)]) / len(images)
-        top5 += sum([int(labels[idx] in top5_list[idx]) for idx in len(images)]) / len(images)
+        accuracy += sum([labels[idx] in top1_list[1][idx] for idx in range(len(images))]) / len(images)
+        top5 += sum([labels[idx] in top5_list[1][idx] for idx in range(len(images))]) / len(images)
     print(
-        f"Validation after epoch {i+1}: loss={loss_avg/len(test_loader)}"
+        f"Validation after epoch {i+1}: loss={loss_avg/len(test_loader)} "
         f"accuracy={accuracy/len(test_loader)} top5={top5/len(test_loader)}"
     )
     write_results(
-        "validation.csv", epoch=i+1, loss=loss_avg/len(test_loader), acc=accuracy/len(test_loader),
+        "validation.csv", epoch=i+1, loss=loss_avg/len(test_loader), accuracy=accuracy/len(test_loader),
         top5 = top5/len(test_loader)
     )
+    torch.save(model.state_dict(), f"resnet50_{i}")
         

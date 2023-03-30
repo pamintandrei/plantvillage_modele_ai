@@ -6,12 +6,32 @@ import os
 import os.path
 from typing import Dict, Tuple, List
 
-def load_dataset(img_size, folder, batch_size):
+
+WEIGHTS = [
+    0.001003009,
+    0.00067659,
+    0.001,
+    0.006578947,
+    0.001,
+    0.000470146,
+    0.001,
+    0.000628536,
+    0.000523834,
+    0.00105042,
+    0.000564653,
+    0.000596659,
+    0.000712251,
+    0.002680965,
+    0.000311624,
+]
+
+def load_dataset(img_size, folder, batch_size, num_samples):
     transforms = get_preprocessing_transforms(img_size)
-    dataset = ImageFolder(folder,transform=transforms)
+    dataset = ImageFolder(folder, transform=transforms)
+    sampler = utils.data.WeightedRandomSampler([WEIGHTS[img[1]] for img in dataset], num_samples*batch_size)
     data_loader = utils.data.DataLoader(
         dataset,
-        sampler = utils.data.WeightedRandomSampler([1./15]*15, batch_size),
+        sampler = sampler,
         batch_size=int(batch_size),
         num_workers=0,
         pin_memory=False,

@@ -1,2 +1,2 @@
 import splitfolders
-splitfolders.ratio('D:\plantvillage_modele_ai\PlantVillage', output="D:\plantvillage_modele_ai\PlantVillageSplit", seed=1337, ratio=(.9, 0.1, 0))
+splitfolders.ratio('E:\modele_plantvilige\PlantVillage', output="E:\modele_plantvilige\PlantVillageSplit", seed=1337, ratio=(.9, 0.1, 0))
