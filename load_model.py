@@ -10,7 +10,7 @@ def set_parameter_requires_grad(model):
         
 
 def load_model():
-    model_ft = models.resnet50(pretrained=True)
+    model_ft = models.resnet152(pretrained=True)
     set_parameter_requires_grad(model_ft)
     num_ftrs = model_ft.fc.in_features
     model_ft.fc = nn.Linear(num_ftrs, 15)

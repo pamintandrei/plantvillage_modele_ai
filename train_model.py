@@ -65,9 +65,9 @@ for i in range(epochs):
         f"accuracy={accuracy/len(test_loader)} top5={top5/len(test_loader)}"
     )
     write_results(
-        "results/validation.csv", epoch=i+1, loss=loss_avg/len(test_loader), accuracy=accuracy/len(test_loader),
+        "results/resnet152_validation.csv", epoch=i+1, loss=loss_avg/len(test_loader), accuracy=accuracy/len(test_loader),
         top5 = top5/len(test_loader)
     )
     if i%5==0:
-        torch.save(model.state_dict(), f"checkpoint/resnet101_{i}")
+        torch.save(model.state_dict(), f"checkpoint/resnet152_{i}")
 
